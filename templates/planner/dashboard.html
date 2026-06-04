@@ -1,0 +1,338 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container">
+
+    <h1>
+        🚀 Welcome Back, {{ request.user.username }}
+    </h1>
+
+    <br>
+
+    <!-- Statistics Cards -->
+
+    <div class="stats-grid">
+
+        <div class="stat-card">
+            <h2>{{ total_subjects }}</h2>
+            <p>📚 Subjects</p>
+        </div>
+
+        <div class="stat-card">
+            <h2>{{ total_sessions }}</h2>
+            <p>⏱ Sessions</p>
+        </div>
+
+        <div class="stat-card">
+            <h2>{{ total_study_time }}</h2>
+            <p>🔥 Study Minutes</p>
+        </div>
+
+        <div class="stat-card">
+            <h2>{{ current_streak }}</h2>
+            <p>🔥 Current Streak</p>
+        </div>
+
+    </div>
+
+    <br>
+
+    <!-- Chart Card -->
+
+    <div class="card chart-card">
+
+        <h2>
+            📊 Study Time By Subject
+        </h2>
+
+        <canvas id="subjectChart"></canvas>
+
+    </div>
+
+    <br>
+
+    <!-- AI Planner -->
+
+    <div class="card">
+
+        <h2>🤖 AI Study Planner</h2>
+
+        <p>
+            Generate a personalized AI-powered study schedule.
+        </p>
+
+        <br>
+
+        <a href="{% url 'ai_schedule' %}">
+            <button>
+                Generate AI Schedule
+            </button>
+        </a>
+
+    </div>
+
+    <!-- Streak -->
+
+    <div class="card">
+
+        <h2>🔥 Study Streak</h2>
+
+        <p>
+            Current Streak:
+            <strong>
+                {{ current_streak }} Days
+            </strong>
+        </p>
+
+        <p>
+            Longest Streak:
+            <strong>
+                {{ longest_streak }} Days
+            </strong>
+        </p>
+
+    </div>
+
+    <!-- Add Subject -->
+
+    <div class="card">
+
+        <h2>📚 Add Subject</h2>
+
+        <form method="POST">
+
+            {% csrf_token %}
+
+            <input
+                type="hidden"
+                name="add_subject"
+                value="1"
+            >
+
+            {{ form.as_p }}
+
+            <button type="submit">
+                Add Subject
+            </button>
+
+        </form>
+
+    </div>
+
+    <!-- Subject List -->
+
+    <div class="card">
+
+        <h2>📖 Your Subjects</h2>
+
+        {% for subject in subjects %}
+
+            <div>
+
+                <h3>
+                    {{ subject.name }}
+                </h3>
+
+                <p>
+                    Difficulty:
+                    {{ subject.difficulty }}/5
+                </p>
+
+                <p>
+                    Target:
+                    {{ subject.target_days }} Days
+                </p>
+
+                <a href="/edit-subject/{{ subject.id }}/">
+                    ✏ Edit
+                </a>
+
+                |
+
+                <a href="/delete-subject/{{ subject.id }}/">
+                    🗑 Delete
+                </a>
+
+            </div>
+
+            <hr>
+
+        {% empty %}
+
+            <p>
+                No subjects added yet.
+            </p>
+
+        {% endfor %}
+
+    </div>
+
+    <!-- Add Session -->
+
+    <div class="card">
+
+        <h2>⏱ Add Study Session</h2>
+
+        <form method="POST">
+
+            {% csrf_token %}
+
+            <input
+                type="hidden"
+                name="add_session"
+                value="1"
+            >
+
+            {{ session_form.as_p }}
+
+            <button type="submit">
+                Save Session
+            </button>
+
+        </form>
+
+    </div>
+
+    <!-- Study History -->
+
+    <div class="card">
+
+        <h2>📜 Recent Study Sessions</h2>
+
+        {% for session in sessions %}
+
+            <div>
+
+                <h3>
+                    {{ session.subject.name }}
+                </h3>
+
+                <p>
+                    ⏱ {{ session.duration }} Minutes
+                </p>
+
+                <p>
+                    📅 {{ session.date }}
+                </p>
+
+                <p>
+                    {% if session.completed %}
+                        ✅ Completed
+                    {% else %}
+                        ❌ Not Completed
+                    {% endif %}
+                </p>
+
+            </div>
+
+            <hr>
+
+        {% empty %}
+
+            <p>
+                No study sessions recorded yet.
+            </p>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
+<script>
+
+const ctx =
+document.getElementById(
+    "subjectChart"
+);
+
+new Chart(
+
+    ctx,
+
+    {
+
+        type: "bar",
+
+        data: {
+
+            labels:
+            {{ subject_labels|safe }},
+
+            datasets: [
+
+                {
+
+                    label:
+                    "Study Minutes",
+
+                    data:
+                    {{ subject_minutes|safe }},
+
+                    backgroundColor:
+                    "#60a5fa",
+
+                    borderRadius: 12,
+
+                }
+
+            ]
+
+        },
+
+        options: {
+
+            responsive: true,
+
+            maintainAspectRatio: false,
+
+            plugins: {
+
+                legend: {
+
+                    labels: {
+
+                        color: "white"
+
+                    }
+
+                }
+
+            },
+
+            scales: {
+
+                x: {
+
+                    ticks: {
+
+                        color: "white"
+
+                    }
+
+                },
+
+                y: {
+
+                    beginAtZero: true,
+
+                    ticks: {
+
+                        color: "white"
+
+                    }
+
+                }
+
+            }
+
+        }
+
+    }
+
+);
+
+</script>
+
+{% endblock %}

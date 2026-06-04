@@ -1,0 +1,211 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container">
+
+    <h2>Pomodoro Timer 🍅</h2>
+
+    <div class="card">
+
+        <h3>Select Study Session</h3>
+
+        <form id="pomodoroForm">
+
+            {% csrf_token %}
+
+            {{ form.as_p }}
+
+        </form>
+
+        <h1 id="timer">
+            25:00
+        </h1>
+
+        <button onclick="startTimer()">
+            Start
+        </button>
+
+        <button onclick="pauseTimer()">
+            Pause
+        </button>
+
+        <button onclick="resetTimer()">
+            Reset
+        </button>
+
+    </div>
+
+</div>
+
+<script>
+
+let timer;
+
+let timeLeft = 25 * 60;
+
+function updateDisplay() {
+
+    let minutes = Math.floor(timeLeft / 60);
+
+    let seconds = timeLeft % 60;
+
+    document.getElementById("timer").innerText =
+        String(minutes).padStart(2, '0')
+        + ":"
+        +
+        String(seconds).padStart(2, '0');
+}
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function() {
+
+        const durationField =
+            document.getElementById(
+                "id_duration"
+            );
+
+        timeLeft =
+            parseInt(
+                durationField.value
+            ) * 60;
+
+        updateDisplay();
+
+        durationField.addEventListener(
+            "change",
+            function() {
+
+                timeLeft =
+                    parseInt(
+                        this.value
+                    ) * 60;
+
+                updateDisplay();
+
+            }
+        );
+
+    }
+);
+
+function startTimer() {
+
+    if (timer) return;
+
+    timer = setInterval(
+        function() {
+
+            if (timeLeft > 0) {
+
+                timeLeft--;
+
+                updateDisplay();
+
+            }
+
+            else {
+
+                clearInterval(
+                    timer
+                );
+
+                timer = null;
+
+                const subjectId =
+                    document.getElementById(
+                        "id_subject"
+                    ).value;
+
+                const duration =
+                    document.getElementById(
+                        "id_duration"
+                    ).value;
+
+                fetch(
+                    "/save-pomodoro-session/",
+                    {
+
+                        method: "POST",
+
+                        headers: {
+
+                            "X-CSRFToken":
+                                document.querySelector(
+                                    "[name=csrfmiddlewaretoken]"
+                                ).value,
+
+                            "Content-Type":
+                                "application/x-www-form-urlencoded",
+
+                        },
+
+                        body:
+                            "subject_id=" +
+                            subjectId +
+                            "&duration=" +
+                            duration
+
+                    }
+                )
+
+                .then(
+                    response =>
+                    response.json()
+                )
+
+                .then(
+                    data => {
+
+                        alert(
+                            "🎉 Session Saved Successfully!"
+                        );
+
+                    }
+                );
+
+            }
+
+        },
+
+        1000
+    );
+
+}
+
+function pauseTimer() {
+
+    clearInterval(
+        timer
+    );
+
+    timer = null;
+
+}
+
+function resetTimer() {
+
+    clearInterval(
+        timer
+    );
+
+    timer = null;
+
+    const duration =
+        document.getElementById(
+            "id_duration"
+        ).value;
+
+    timeLeft =
+        parseInt(
+            duration
+        ) * 60;
+
+    updateDisplay();
+
+}
+
+</script>
+
+{% endblock %}

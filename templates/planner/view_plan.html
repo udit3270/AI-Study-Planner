@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container">
+
+    <h2>
+        🤖 AI Study Plan
+    </h2>
+
+    <p>
+
+        Generated On:
+
+        {{ plan.created_at|date:"M d, Y h:i:s A" }}
+
+    </p>
+
+    <hr>
+
+    <pre>
+{{ plan.generated_plan }}
+    </pre>
+
+    <br>
+
+    <a href="{% url 'ai_schedule' %}">
+        ← Back
+    </a>
+
+</div>
+
+{% endblock %}

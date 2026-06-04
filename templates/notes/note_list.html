@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container">
+
+    <h2>My Notes</h2>
+
+    <div class="card">
+
+        <h3>Create Note</h3>
+
+        <form method="POST" enctype="multipart/form-data">
+
+            {% csrf_token %}
+
+            {{ form.as_p }}
+
+            <button type="submit">
+                Save Note
+            </button>
+
+        </form>
+
+    </div>
+
+    <br><br>
+
+    <div class="card">
+
+        <h3>Saved Notes</h3>
+
+        {% for note in notes %}
+
+            <div>
+
+                <h4>
+                    {{ note.title }}
+                </h4>
+
+                <p>
+                    {{ note.content }}
+                </p>
+
+                {% if note.file %}
+
+                    <a href="{{ note.file.url }}">
+                        View File
+                    </a>
+
+                {% endif %}
+
+                <br><br>
+
+                <a href="/notes/delete/{{ note.id }}/">
+                    Delete
+                </a>
+
+            </div>
+
+            <hr>
+
+        {% empty %}
+
+            <p>
+                No notes added yet.
+            </p>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
+{% endblock %}

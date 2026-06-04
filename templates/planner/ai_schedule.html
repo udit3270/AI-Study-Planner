@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container">
+
+    <h2>
+    AI Roadmap Generator 🤖
+    </h2>
+    
+    <p>
+    Select a subject and generate a complete AI learning roadmap.
+    </p>
+
+    <div class="card">
+
+        <form method="POST">
+
+    {% csrf_token %}
+
+    <label>
+        Select Subject
+    </label>
+
+    <select
+        name="subject_id"
+        required
+    >
+
+        {% for subject in subjects %}
+
+            <option
+                value="{{ subject.id }}"
+            >
+                {{ subject.name }}
+            </option>
+
+        {% endfor %}
+
+    </select>
+
+    <br><br>
+
+    <label>
+        Study Hours Per Day
+    </label>
+
+    <input
+        type="number"
+        name="study_hours"
+        min="1"
+        max="12"
+        required
+    >
+
+    <button type="submit">
+        Generate Roadmap
+    </button>
+
+</form>
+
+    </div>
+
+    <br>
+
+    {% if generated_plan %}
+
+    <div class="card">
+
+        <h3>
+            Your AI Schedule
+        </h3>
+
+        <pre>
+{{ generated_plan }}
+        </pre>
+
+    </div>
+
+    <br>
+
+    {% endif %}
+
+    <div class="card">
+
+        <h3>
+            Previous AI Plans 📚
+        </h3>
+
+        {% for plan in previous_plans %}
+
+            <div>
+
+                <p>
+
+                    <strong>
+                        {{ plan.created_at|date:"M d, Y h:i:s A" }}
+                    </strong>
+
+                </p>
+
+                <a href="{% url 'view_plan' plan.id %}">
+                    👁 View Plan
+                </a>
+
+                <br><br>
+
+                <a
+                    href="{% url 'delete_plan' plan.id %}"
+                    onclick="return confirm('Delete this AI plan?');"
+                >
+                    🗑 Delete Plan
+                </a>
+
+            </div>
+
+            <hr>
+
+        {% empty %}
+
+            <p>
+                No AI plans generated yet.
+            </p>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
+{% endblock %}
